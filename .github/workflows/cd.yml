@@ -55,6 +55,6 @@ jobs:
         run: |
           aws ecs update-service \
             --cluster fcg-cluster \
-            --service fcg-users-task-service-57hptthy \
+            --service fcg-games-task-service-8a670sbm \
             --force-new-deployment \
             --region us-east-1
