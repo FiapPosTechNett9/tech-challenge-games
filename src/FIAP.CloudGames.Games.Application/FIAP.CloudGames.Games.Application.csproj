@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\FIAP.CloudGames.Games.Domain\FIAP.CloudGames.Games.Domain.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	  
+	<RootNamespace>FIAP.CloudGames.Games.Application</RootNamespace>
+	<AssemblyName>FIAP.CloudGames.Games.Application</AssemblyName>
+  </PropertyGroup>
+
+</Project>

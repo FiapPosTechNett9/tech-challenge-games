@@ -1,0 +1,11 @@
+@games_host = http://localhost:5117
+
+### Health
+GET {{games_host}}/games/health
+Accept: application/json
+
+### Get all games (precisa Bearer)
+GET {{games_host}}/games/api/game
+Accept: application/json
+Authorization: Bearer {{jwt_token}}
+
