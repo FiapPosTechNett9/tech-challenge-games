@@ -130,9 +130,22 @@ app.MapGet("/health", () => Results.Ok("OK")).AllowAnonymous();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
+    var swaggerBasePath = builder.Configuration["SwaggerBasePath"] ?? "/games";
+
+    app.UseSwagger(c =>
+    {
+        c.PreSerializeFilters.Add((swagger, req) =>
+        {
+            swagger.Servers = new List<OpenApiServer>
+            {
+                new OpenApiServer { Url = swaggerBasePath }
+            };
+        });
+    });
+
     app.UseSwaggerUI(c =>
     {
+        c.RoutePrefix = "swagger";
         c.SwaggerEndpoint("v1/swagger.json", "Games API v1");
     });
 }

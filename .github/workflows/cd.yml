@@ -36,7 +36,7 @@ jobs:
       - name: Build and push Docker images
         uses: docker/build-push-action@v6.18.0
         with:
-          tags: '${{ secrets.DOCKER_USERNAME }}/tech-challenge-users:latest'
+          tags: '${{ secrets.DOCKER_USERNAME }}/tech-challenge-games:latest'
           context: .
           push: true
 
@@ -52,6 +52,6 @@ jobs:
         run: |
           aws ecs update-service \
             --cluster fcg-cluster \
-            --service fcg-users-task-service-57hptthy \
+            --service fcg-games-task-service-8a670sbm \
             --force-new-deployment \
             --region us-east-1
