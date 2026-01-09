@@ -4,6 +4,8 @@ using FIAP.CloudGames.Games.Application.Contracts.Search;
 using FIAP.CloudGames.Games.Application.Interfaces;
 using FIAP.CloudGames.Games.Domain.Entities;
 using FIAP.CloudGames.Games.Infrastructure.Configuration.Search;
+using Elastic.Clients.Elasticsearch;
+using Elastic.Clients.Elasticsearch.QueryDsl;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -63,7 +65,7 @@ namespace FIAP.CloudGames.Games.Infrastructure.Search
                             .Query(query)
                             .Fields(new[] { "title^3", "description", "developer", "publisher" })
                             .Type(TextQueryType.BestFields)
-                            .Fuzziness("AUTO")
+                            .Fuzziness(new Fuzziness("AUTO"))
                         ),
                         sh => sh.Match(m => m.Field(f => f.Title).Query(query))
                     )
@@ -86,13 +88,20 @@ namespace FIAP.CloudGames.Games.Infrastructure.Search
         {
             top = top is < 1 or > 50 ? 10 : top;
 
+            var sort = new List<SortOptions>
+    {
+                // campo + config do sort
+                SortOptions.Field("releaseDate", new FieldSort
+                {
+                    Order = SortOrder.Desc
+                })
+            };
+
             var resp = await _client.SearchAsync<GameSearchDocument>(s => s
                 .Index(_settings.Index)
                 .Size(top)
-                .Sort(so => so.Field(f => f
-                    .Field(ff => ff.ReleaseDate)
-                    .Order(SortOrder.Desc)
-                )), ct);
+                .Sort(sort)
+            , ct);
 
             if (!resp.IsValidResponse)
                 throw new InvalidOperationException($"Elasticsearch popular failed: {resp.DebugInformation}");
