@@ -1,19 +1,25 @@
-﻿using FIAP.CloudGames.Games.Application.Dtos;
+﻿using FIAP.CloudGames.Games.Application.Contracts.Payments;
+using FIAP.CloudGames.Games.Application.Contracts.Purchases;
+using FIAP.CloudGames.Games.Application.Dtos;
 using FIAP.CloudGames.Games.Application.Interfaces;
 using FIAP.CloudGames.Games.Domain.Entities;
 using FIAP.CloudGames.Games.Domain.Interfaces.Repositories;
+using System.Net.Http;
+using System.Net.Http.Json;
 
 namespace FIAP.CloudGames.Games.Application.Services;
 
 public class GameService : IGameService
 {
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly IGameRepository _gameRepository;
     private readonly IGameSearchService _search;
 
-    public GameService(IGameRepository gameRepository, IGameSearchService search)
+    public GameService(IGameRepository gameRepository, IGameSearchService search, IHttpClientFactory httpClientFactory)
     {
         _gameRepository = gameRepository;
         _search = search;
+        _httpClientFactory = httpClientFactory;
     }
 
     public async Task<Game> CreateAsync(CreateGameDto dto)
@@ -73,5 +79,45 @@ public class GameService : IGameService
         await _search.RemoveAsync(game.Id);
 
         return true;
+    }
+    public async Task<PurchaseGameResponse> PurchaseAsync(
+    Guid gameId,
+    Guid userId,
+    CancellationToken ct = default)
+    {
+        var game = await _gameRepository.GetByIdAsync(gameId);
+        if (game is null)
+            throw new KeyNotFoundException("Game not found.");
+
+        var orderId = Guid.NewGuid();
+
+        var request = new CreatePaymentRequest
+        {
+            OrderId = orderId,
+            UserId = userId,
+            Amount = game.Price
+        };
+
+        var client = _httpClientFactory.CreateClient("Payments");
+
+        var response = await client.PostAsJsonAsync(
+            "payments/payments",
+            request,
+            ct);
+
+        if (!response.IsSuccessStatusCode)
+            throw new InvalidOperationException("Payment service error.");
+
+        // Payments retorna UM GUID PURO
+        var paymentId = await response.Content.ReadFromJsonAsync<Guid>(ct);
+
+        return new PurchaseGameResponse
+        {
+            OrderId = orderId,
+            PaymentId = paymentId,
+            GameId = gameId,
+            UserId = userId,
+            Amount = game.Price
+        };
     }
 }
