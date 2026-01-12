@@ -11,9 +11,11 @@ using FIAP.CloudGames.Games.Infrastructure.Context;
 using FIAP.CloudGames.Games.Infrastructure.Logging;
 using FIAP.CloudGames.Games.Infrastructure.Repositories;
 using FIAP.CloudGames.Games.Infrastructure.Search;
+using FIAP.CloudGames.Games.Infrastructure.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Models;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -140,6 +142,15 @@ builder.Services.AddSingleton<ElasticsearchClient>(sp =>
 });
 
 builder.Services.AddScoped<IGameSearchService, GameSearchService>();
+
+builder.Services.Configure<PaymentsSettings>(
+    builder.Configuration.GetSection("Payments"));
+
+builder.Services.AddHttpClient("Payments", (sp, client) =>
+{
+    var settings = sp.GetRequiredService<IOptions<PaymentsSettings>>().Value;
+    client.BaseAddress = new Uri(settings.BaseUrl);
+});
 
 var app = builder.Build();
 

@@ -1,3 +1,4 @@
+using FIAP.CloudGames.Games.Application.Contracts.Purchases;
 using FIAP.CloudGames.Games.Application.Dtos;
 using FIAP.CloudGames.Games.Domain.Entities;
 
@@ -10,4 +11,8 @@ public interface IGameService
     Task<Game> CreateAsync(CreateGameDto dto);
     Task<Game?> UpdateAsync(UpdateGameDto dto);
     Task<bool> DeleteAsync(Guid id);
+    Task<PurchaseGameResponse> PurchaseAsync(
+    Guid gameId,
+    Guid userId,
+    CancellationToken ct = default);
 }

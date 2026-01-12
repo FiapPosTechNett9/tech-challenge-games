@@ -14,12 +14,14 @@ namespace FIAP.CloudGames.Games.Tests.Application
 {
     public class GameServiceTests
     {
+
         [Fact]
         public async Task CreateAsync_Should_Save_Game_And_Index_In_Elasticsearch()
         {
             // Arrange
             var repositoryMock = new Mock<IGameRepository>();
             var searchMock = new Mock<IGameSearchService>();
+            var httpClientFactoryMock = new Mock<IHttpClientFactory>();
 
             repositoryMock
                 .Setup(r => r.AddAsync(It.IsAny<Game>()))
@@ -31,7 +33,8 @@ namespace FIAP.CloudGames.Games.Tests.Application
 
             var service = new GameService(
                 repositoryMock.Object,
-                searchMock.Object
+                searchMock.Object,
+                httpClientFactoryMock.Object 
             );
 
             var dto = new CreateGameDto

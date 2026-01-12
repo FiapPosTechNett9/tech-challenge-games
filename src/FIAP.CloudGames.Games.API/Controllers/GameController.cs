@@ -1,3 +1,4 @@
+using FIAP.CloudGames.Games.Application.Contracts.Purchases;
 using FIAP.CloudGames.Games.Application.Dtos;
 using FIAP.CloudGames.Games.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -145,5 +146,16 @@ public class GameController : ControllerBase
         _logger.LogInformation("Game deletado com sucesso {GameId}", id);
 
         return NoContent();
+    }
+
+    [HttpPost("{gameId:guid}/purchase")]
+    [Authorize(Roles = "Admin,User")]
+    public async Task<ActionResult<PurchaseGameResponse>> Purchase(
+    Guid gameId,
+    [FromQuery] Guid userId,
+    CancellationToken ct)
+    {
+        var result = await _gameService.PurchaseAsync(gameId, userId, ct);
+        return Ok(result);
     }
 }
